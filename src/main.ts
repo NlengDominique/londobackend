@@ -2,6 +2,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,7 +13,7 @@ async function bootstrap() {
     credentials: true,
   });
   
-  // Global validation pipe
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -20,12 +21,14 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.useGlobalFilters(new AllExceptionsFilter())
   
-  // Global API prefix
+
   app.setGlobalPrefix('api');
   
   const port = process.env.PORT ?? 3000;
-  console.log(`🌱 Plant Manager API is running on port ${port}`);
+  console.log(`My app is running on port ${port}`);
   await app.listen(port);
 }
 // eslint-disable-next-line @typescript-eslint/no-floating-promises

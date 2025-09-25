@@ -1,10 +1,14 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
+import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { User } from './entities/user.entity';
-import { RegisterDto, AuthResponseDto } from './dto/auth.dto';
+import { RegisterDto, AuthResponseDto, LoginDto } from './dto/auth.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -15,13 +19,20 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
+  const loginDto = plainToInstance(LoginDto, { email, password });
+  const errors = await validate(loginDto);
+
+  if (errors.length > 0) {
+    const messages = errors.map(err => Object.values(err.constraints || {})).flat();
+    throw new BadRequestException(messages);
+  }
     const user = await this.userRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'name', 'password', 'isActive'],
+      select: ['id', 'email', 'name', 'password'],
     });
 
-    if (user && user.isActive && (await user.validatePassword(password))) {
-      // Remove password from return object
+    if (user && (await user.validatePassword(password))) {
+   
       const { password: _, ...result } = user;
       return result as User;
     }
@@ -36,7 +47,7 @@ export class AuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: await this.jwtService.signAsync(payload),
       user: {
         id: user.id,
         email: user.email,
@@ -46,30 +57,28 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    // Check if user already exists
+    
     const existingUser = await this.userRepository.findOne({
       where: { email: registerDto.email },
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException('Email deja utilisee');
     }
 
-    // Create new user
+    
     const user = this.userRepository.create(registerDto);
     const savedUser = await this.userRepository.save(user);
-
-    // Return JWT token and user info
     return this.login(savedUser);
   }
 
   async findById(id: number): Promise<User | null> {
     const user = await this.userRepository.findOne({
-      where: { id, isActive: true },
+      where: { id },
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Utilisateur pas trouve');
     }
 
     return user;
@@ -82,7 +91,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Utilisateur pas trouve');
     }
 
     return user;

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -16,17 +17,14 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column()
   name: string;
 
-  @Column({ type: 'varchar', length: 255, select: false })
+  @Column({ select: false })
   password: string;
-
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
 
   @OneToMany(() => Plant, (plant) => plant.user)
   plants: Plant[];
