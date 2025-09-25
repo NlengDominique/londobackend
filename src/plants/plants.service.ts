@@ -1,15 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable prettier/prettier */
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Plant } from './entities/plant.entity';
 import { CreatePlantDto } from './dto/create-plant.dto';
-import { UpdatePlantDto } from './dto/update-plant.dto';
+import { IPlantsService } from './interfaces/plants-service.interface';
+import { PlantCalculationService } from './services/plant-calculation.service';
 
 @Injectable()
-export class PlantsService {
+export class PlantsService implements IPlantsService {
   constructor(
     @InjectRepository(Plant)
     private readonly plantRepository: Repository<Plant>,
+    private readonly calculationService: PlantCalculationService,
   ) {}
 
   async create(createPlantDto: CreatePlantDto, userId: number): Promise<Plant> {
@@ -19,7 +23,6 @@ export class PlantsService {
       purchaseDate: new Date(createPlantDto.purchaseDate),
     });
 
-    // Calculer la prochaine date d'arrosage basée sur la date d'achat
     plant.nextWateringDate = this.calculateNextWateringDate(
       plant.purchaseDate,
       plant.wateringFrequency,
@@ -30,54 +33,31 @@ export class PlantsService {
 
   async findAll(userId: number): Promise<Plant[]> {
     return this.plantRepository.find({
-      where: { isActive: true, userId },
-      relations: ['wateringRecords'],
+      where: { userId },
       order: { createdAt: 'DESC' },
     });
   }
 
   async findOne(id: number, userId: number): Promise<Plant> {
     const plant = await this.plantRepository.findOne({
-      where: { id, isActive: true, userId },
-      relations: ['wateringRecords'],
+      where: { id, userId },
     });
 
     if (!plant) {
-      throw new NotFoundException(`Plant with ID ${id} not found`);
+      throw new NotFoundException('Plante pas disponible');
     }
+
+     if (plant.userId !== userId) {
+    throw new ForbiddenException(
+     'Pas autorise a voir cette ressource'
+    );
+  }
 
     return plant;
   }
 
-  async update(id: number, updatePlantDto: UpdatePlantDto, userId: number): Promise<Plant> {
-    const plant = await this.findOne(id, userId);
-
-    const updatedPlant = { ...plant, ...updatePlantDto };
-
-    if (updatePlantDto.purchaseDate) {
-      updatedPlant.purchaseDate = new Date(updatePlantDto.purchaseDate);
-    }
-
-    // Recalculer la prochaine date d'arrosage si la fréquence a changé
-    if (updatePlantDto.wateringFrequency && plant.lastWateredAt) {
-      updatedPlant.nextWateringDate = this.calculateNextWateringDate(
-        plant.lastWateredAt,
-        updatePlantDto.wateringFrequency,
-      );
-    }
-
-    await this.plantRepository.update(id, updatedPlant);
-    return this.findOne(id, userId);
-  }
-
-  async remove(id: number, userId: number): Promise<void> {
-    const plant = await this.findOne(id, userId);
-    await this.plantRepository.update(id, { isActive: false });
-  }
-
-  async getPlantsNeedingWater(userId: number): Promise<Plant[]> {
-    const plants = await this.findAll(userId);
-    return plants.filter((plant) => plant.needsWatering());
+  private calculateNextWateringDate(lastDate: Date, frequency: number): Date {
+    return this.calculationService.calculateNextWateringDate(lastDate, frequency);
   }
 
   async updateWateringDate(plantId: number, wateredAt: Date, userId: number): Promise<Plant> {
@@ -89,13 +69,6 @@ export class PlantsService {
       plant.wateringFrequency,
     );
 
-    await this.plantRepository.save(plant);
-    return plant;
-  }
-
-  private calculateNextWateringDate(lastDate: Date, frequency: number): Date {
-    const nextDate = new Date(lastDate);
-    nextDate.setDate(nextDate.getDate() + frequency);
-    return nextDate;
+    return this.plantRepository.save(plant);
   }
 }

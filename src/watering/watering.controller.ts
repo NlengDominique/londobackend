@@ -1,55 +1,62 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
   Post,
   Body,
   Param,
+  UseGuards,
   ParseIntPipe,
   ValidationPipe,
-  HttpStatus,
+  Req,
   HttpCode,
+  HttpStatus,
   Query,
-  UseGuards,
-  Request,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { WateringService } from './watering.service';
 import { CreateWateringRecordDto } from './dto/create-watering-record.dto';
 import { JwtAuthGuard } from '../auth/guards/auth.guards';
+import { WateringRecord } from './entities/watering-record.entity';
 
-@Controller()
+@Controller('watering')
+@UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)
 export class WateringController {
   constructor(private readonly wateringService: WateringService) {}
 
-  @Post('plants/:plantId/watering')
+  @Get('all')
+
+  @HttpCode(HttpStatus.OK)
+  async findAllUserWateringRecords(
+    @Req() req: { user: { id: number } },
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ): Promise<WateringRecord[]> {
+    return this.wateringService.findAllUserWateringRecords(
+      req.user.id,
+      startDate ? new Date(startDate) : undefined,
+      endDate ? new Date(endDate) : undefined,
+    );
+  }
+
+  @Post('plants/:plantId')
   @HttpCode(HttpStatus.CREATED)
-  recordWatering(
+  create(
     @Param('plantId', ParseIntPipe) plantId: number,
     @Body(ValidationPipe) createWateringRecordDto: CreateWateringRecordDto,
-    @Request() req,
-  ) {
-    return this.wateringService.recordWatering(plantId, createWateringRecordDto, req.user.id);
+    @Req() req: { user: { id: number } },
+  ): Promise<WateringRecord> {
+    return this.wateringService.create(plantId, req.user.id, createWateringRecordDto);
   }
 
-  @Get('plants/:plantId/watering')
-  getWateringHistory(@Param('plantId', ParseIntPipe) plantId: number, @Request() req) {
-    return this.wateringService.getWateringHistory(plantId, req.user.id);
-  }
-
-  @Get('plants/:plantId/watering/:recordId')
-  getWateringRecord(
+  @Get('plants/:plantId')
+  @HttpCode(HttpStatus.OK)
+  findAll(
     @Param('plantId', ParseIntPipe) plantId: number,
-    @Param('recordId', ParseIntPipe) recordId: number,
-    @Request() req,
-  ) {
-    return this.wateringService.getWateringRecord(plantId, recordId, req.user.id);
-  }
-
-  @Get('watering')
-  getAllWateringRecords(@Query('days', ParseIntPipe) days?: number) {
-    if (days) {
-      return this.wateringService.getRecentWateringRecords(days);
-    }
-    return this.wateringService.getAllWateringRecords();
+    @Req() req: { user: { id: number } },
+  ): Promise<WateringRecord[]> {
+    return this.wateringService.findAll(plantId, req.user.id);
   }
 }

@@ -6,9 +6,9 @@ import {
   IsDateString,
   IsNumber,
   IsPositive,
-  IsUrl,
   MaxLength,
   Min,
+  IsUrl,
 } from 'class-validator';
 
 export class CreatePlantDto {
@@ -22,9 +22,6 @@ export class CreatePlantDto {
   @MaxLength(255)
   species?: string;
 
-  @IsString()
-  @IsOptional()
-  description?: string;
 
   @IsUrl()
   @IsOptional()
@@ -34,11 +31,7 @@ export class CreatePlantDto {
   @IsDateString()
   purchaseDate: string;
 
-  @IsString()
-  @IsOptional()
-  @MaxLength(50)
-  location?: string;
-
+  //besoin en eau
   @IsNumber()
   @IsPositive()
   @Min(50) 

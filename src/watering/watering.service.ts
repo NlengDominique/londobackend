@@ -1,82 +1,84 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { WateringRecord } from './entities/watering-record.entity';
 import { CreateWateringRecordDto } from './dto/create-watering-record.dto';
 import { PlantsService } from '../plants/plants.service';
+import { IWateringService } from './interfaces/watering.interface';
 
 @Injectable()
-export class WateringService {
+export class WateringService implements IWateringService {
   constructor(
     @InjectRepository(WateringRecord)
-    private readonly wateringRecordRepository: Repository<WateringRecord>,
+    private readonly wateringRepository: Repository<WateringRecord>,
     private readonly plantsService: PlantsService,
   ) {}
 
-  async recordWatering(
-    plantId: number,
-    createWateringRecordDto: CreateWateringRecordDto,
+  async findAllUserWateringRecords(
     userId: number,
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<WateringRecord[]> {
+    const query = this.wateringRepository
+      .createQueryBuilder('watering')
+      .leftJoinAndSelect('watering.plant', 'plant')
+      .where('watering.userId = :userId', { userId })
+      .orderBy('watering.wateredAt', 'DESC');
+
+    if (startDate) {
+      query.andWhere('watering.wateredAt >= :startDate', { startDate });
+    }
+    if (endDate) {
+      query.andWhere('watering.wateredAt <= :endDate', { endDate });
+    }
+
+    return query.getMany();
+  }
+
+  async create(
+    plantId: number,
+    userId: number,
+    createWateringRecordDto: CreateWateringRecordDto,
   ): Promise<WateringRecord> {
-    // Vérifier que la plante existe
+   
     const plant = await this.plantsService.findOne(plantId, userId);
 
-    const wateringRecord = this.wateringRecordRepository.create({
+    const wateringRecord = this.wateringRepository.create({
+      ...createWateringRecordDto,
+      waterAmount: createWateringRecordDto.waterAmount ?? plant.waterAmount,
       plantId,
-      amount: createWateringRecordDto.amount,
-      notes: createWateringRecordDto.notes,
+      userId,
+      wateredAt: new Date(),
     });
 
-    const savedRecord = await this.wateringRecordRepository.save(wateringRecord);
+    const savedRecord = await this.wateringRepository.save(wateringRecord);
 
-    // Mettre à jour la date de dernier arrosage de la plante
-    await this.plantsService.updateWateringDate(plantId, savedRecord.wateredAt, userId);
+    await this.plantsService.updateWateringDate(plantId, wateringRecord.wateredAt, userId);
 
     return savedRecord;
   }
 
-  async getWateringHistory(plantId: number, userId: number): Promise<WateringRecord[]> {
-    // Vérifier que la plante existe
+  async findAll(plantId: number, userId: number): Promise<WateringRecord[]> {
+   
     await this.plantsService.findOne(plantId, userId);
 
-    return this.wateringRecordRepository.find({
-      where: { plantId },
+    return this.wateringRepository.find({
+      where: { plantId, userId },
       order: { wateredAt: 'DESC' },
     });
   }
 
-  async getWateringRecord(plantId: number, recordId: number, userId: number): Promise<WateringRecord> {
-    // Vérifier que la plante existe
-    await this.plantsService.findOne(plantId, userId);
-
-    const record = await this.wateringRecordRepository.findOne({
-      where: { id: recordId, plantId },
+  async findOne(id: number, userId: number): Promise<WateringRecord> {
+    const wateringRecord = await this.wateringRepository.findOne({
+      where: { id, userId },
+      relations: ['plant'],
     });
 
-    if (!record) {
-      throw new NotFoundException(`Watering record with ID ${recordId} not found for plant ${plantId}`);
+    if (!wateringRecord) {
+      throw new NotFoundException(`Watering record with ID ${id} not found`);
     }
 
-    return record;
-  }
-
-  async getAllWateringRecords(): Promise<WateringRecord[]> {
-    return this.wateringRecordRepository.find({
-      relations: ['plant'],
-      order: { wateredAt: 'DESC' },
-    });
-  }
-
-  async getRecentWateringRecords(days: number = 7): Promise<WateringRecord[]> {
-    const date = new Date();
-    date.setDate(date.getDate() - days);
-
-    return this.wateringRecordRepository.find({
-      where: {
-        wateredAt: MoreThanOrEqual(date),
-      },
-      relations: ['plant'],
-      order: { wateredAt: 'DESC' },
-    });
+    return wateringRecord;
   }
 }

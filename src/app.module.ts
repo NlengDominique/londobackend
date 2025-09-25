@@ -7,11 +7,10 @@ import { APP_PIPE } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PlantsModule } from './plants/plants.module';
-import { WateringModule } from './watering/watering.module';
-import { NotificationsModule } from './notifications/notifications.module';
 import { AuthModule } from './auth/auth.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { WateringModule } from './watering/watering.module';
 import { databaseConfig } from './config/database.config';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,8 +20,8 @@ import { databaseConfig } from './config/database.config';
     ScheduleModule.forRoot(),
     AuthModule,
     PlantsModule,
-    WateringModule,
     NotificationsModule,
+    WateringModule,
   ],
   controllers: [AppController],
   providers: [

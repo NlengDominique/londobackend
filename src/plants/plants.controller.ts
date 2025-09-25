@@ -1,61 +1,50 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   ParseIntPipe,
   ValidationPipe,
   HttpStatus,
   HttpCode,
   UseGuards,
-  Request,
+  Req,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+
 } from '@nestjs/common';
 import { PlantsService } from './plants.service';
 import { CreatePlantDto } from './dto/create-plant.dto';
-import { UpdatePlantDto } from './dto/update-plant.dto';
 import { JwtAuthGuard } from '../auth/guards/auth.guards';
+import { Plant } from './entities/plant.entity';
 
 @Controller('plants')
+@UseInterceptors(ClassSerializerInterceptor)
 @UseGuards(JwtAuthGuard)
 export class PlantsController {
   constructor(private readonly plantsService: PlantsService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body(ValidationPipe) createPlantDto: CreatePlantDto, @Request() req) {
+  create(
+    @Body(ValidationPipe) createPlantDto: CreatePlantDto,
+    @Req() req: { user: { id: number } },
+  ): Promise<Plant> {
     return this.plantsService.create(createPlantDto, req.user.id);
   }
 
   @Get()
-  findAll(@Request() req) {
+  @HttpCode(HttpStatus.OK)
+  findAll(@Req() req: { user: { id: number } }): Promise<Plant[]> {
     return this.plantsService.findAll(req.user.id);
   }
 
-  @Get('notifications')
-  getPlantsNeedingWater(@Request() req) {
-    return this.plantsService.getPlantsNeedingWater(req.user.id);
-  }
-
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: { user: { id: number } }): Promise<Plant> {
     return this.plantsService.findOne(id, req.user.id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body(ValidationPipe) updatePlantDto: UpdatePlantDto,
-    @Request() req,
-  ) {
-    return this.plantsService.update(id, updatePlantDto, req.user.id);
-  }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    return this.plantsService.remove(id, req.user.id);
-  }
 }

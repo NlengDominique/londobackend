@@ -1,12 +1,9 @@
-import { IsNumber, IsPositive, IsOptional, IsString, Min } from 'class-validator';
+/* eslint-disable prettier/prettier */
+import { IsNumber, IsOptional,  Min } from 'class-validator';
 
 export class CreateWateringRecordDto {
   @IsNumber()
-  @IsPositive()
-  @Min(10) // Minimum 10ml
-  amount: number;
-
-  @IsString()
+  @Min(1)
   @IsOptional()
-  notes?: string;
+  waterAmount?: number;
 }

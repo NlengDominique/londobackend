@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Plant } from '../../plants/entities/plant.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('watering_records')
 export class WateringRecord {
@@ -16,18 +18,22 @@ export class WateringRecord {
   @Column({ type: 'integer' })
   plantId: number;
 
+  @Exclude()
+  @Column({ type: 'integer' })
+  userId: number;
+
   @ManyToOne(() => Plant, (plant) => plant.wateringRecords, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'plantId' })
   plant: Plant;
 
-  @Column({ type: 'integer' }) // quantité en millilitres
-  amount: number;
+  @Column({ type: 'datetime' })
+  wateredAt: Date;
 
-  @Column({ type: 'text', nullable: true })
-  notes: string;
+  @Column({ type: 'integer' })
+  waterAmount: number;
 
   @CreateDateColumn()
-  wateredAt: Date;
+  createdAt: Date;
 }

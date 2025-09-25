@@ -5,18 +5,23 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
   ManyToOne,
+  OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
-import { WateringRecord } from '../../watering/entities/watering-record.entity';
 import { User } from '../../auth/entities/user.entity';
+import { Exclude } from 'class-transformer';
+import { WateringRecord } from '../../watering/entities/watering-record.entity';
 
 @Entity('plants')
+@Index(['userId'])
+@Index(['nextWateringDate'])
 export class Plant {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Exclude()
   @Column({ type: 'integer' })
   userId: number;
 
@@ -26,29 +31,25 @@ export class Plant {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column()
   name: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({nullable:true})
   species: string;
 
-  @Column({ type: 'text', nullable: true })
-  description: string;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ nullable: true })
   imageUrl: string;
 
   @Column({ type: 'date' })
   purchaseDate: Date;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  location: string;
 
   // Besoins en eau
-  @Column({ type: 'integer', default: 500 }) // en millilitres
+  @Column({ type: 'integer', default: 500 }) 
   waterAmount: number;
 
-  @Column({ type: 'integer', default: 3 }) // en jours
+  @Column({ type: 'integer', default: 3 }) 
   wateringFrequency: number;
 
   @Column({ type: 'datetime', nullable: true })
@@ -57,33 +58,12 @@ export class Plant {
   @Column({ type: 'datetime', nullable: true })
   nextWateringDate: Date;
 
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
-
-  @OneToMany(() => WateringRecord, (wateringRecord) => wateringRecord.plant)
-  wateringRecords: WateringRecord[];
-
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
 
-  // Méthode utilitaire pour calculer la prochaine date d'arrosage
-  calculateNextWateringDate(): Date {
-    if (!this.lastWateredAt) {
-      return new Date();
-    }
-    const nextDate = new Date(this.lastWateredAt);
-    nextDate.setDate(nextDate.getDate() + this.wateringFrequency);
-    return nextDate;
-  }
-
-  // Méthode pour vérifier si la plante a besoin d'eau
-  needsWatering(): boolean {
-    if (!this.nextWateringDate) {
-      return true;
-    }
-    return new Date() >= this.nextWateringDate;
-  }
+  @OneToMany(() => WateringRecord, (wateringRecord) => wateringRecord.plant)
+  wateringRecords: WateringRecord[];
 }

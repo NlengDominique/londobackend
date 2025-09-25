@@ -1,15 +1,19 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NotificationsService } from './notifications.service';
-import { NotificationsController } from './notifications.controller';
-import { Notification } from './entities/notification.entity';
+import { ConfigModule } from '@nestjs/config';
+import { WateringReminderService } from './watering-reminder.service';
+import { EmailService } from './email.service';
+import { RemindersController } from './reminders.controller';
 import { Plant } from '../plants/entities/plant.entity';
-import { PlantsModule } from '../plants/plants.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Notification, Plant]), PlantsModule],
-  controllers: [NotificationsController],
-  providers: [NotificationsService],
-  exports: [NotificationsService],
+  imports: [
+    TypeOrmModule.forFeature([Plant]),
+    ConfigModule,
+  ],
+  controllers: [RemindersController],
+  providers: [WateringReminderService, EmailService],
+  exports: [WateringReminderService, EmailService],
 })
 export class NotificationsModule {}
