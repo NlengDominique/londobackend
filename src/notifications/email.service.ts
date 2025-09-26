@@ -24,6 +24,7 @@ export class EmailService {
     });
   }
 
+  //envoi d'email
   async sendEmail(to: string, subject: string, text: string): Promise<void> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -34,33 +35,35 @@ export class EmailService {
         subject,
         text,
       });
-      this.logger.debug(`Email sent to ${to}`);
+      this.logger.debug(`Email envoye a ${to}`);
     } catch (error) {
-      this.logger.error(`Failed to send email to ${to}:`, error);
+      this.logger.error(`Erreur lors de l'envoi de l'email a ${to}:`, error);
       throw error;
     }
   }
 
+  //rappel d'arrosage
   async sendWateringReminder(email: string, plantName: string, waterAmount: number): Promise<void> {
-    const subject = 'Rappel d\'arrosage - Plant Manager';
+    const subject = 'Rappel d\'arrosage - Plantify';
     const text = 
       `Bonjour,\n\n` +
       `Votre plante "${plantName}" a besoin d'être arrosée aujourd'hui !\n` +
       `Quantité d'eau recommandée : ${waterAmount}ml\n\n` +
       `N'oubliez pas de marquer la plante comme arrosée dans l'application une fois que c'est fait.\n\n` +
-      'À bientôt,\nPlant Manager';
+      'À bientôt,\nPlantify';
 
     await this.sendEmail(email, subject, text);
   }
 
+  //rappel d'arrosage manque
   async sendMissedWateringReminder(email: string, plantName: string, waterAmount: number): Promise<void> {
-    const subject = 'Rappel : Arrosage manqué - Plant Manager';
+    const subject = 'Rappel : Arrosage manqué - Plantify';
     const text = 
       `Bonjour,\n\n` +
       `Il semble que vous n'ayez pas encore arrosé votre plante "${plantName}" hier.\n` +
       `Il n'est pas trop tard ! Votre plante a besoin de ${waterAmount}ml d'eau.\n\n` +
       `N'oubliez pas de marquer la plante comme arrosée dans l'application une fois que c'est fait.\n\n` +
-      'À bientôt,\nPlant Manager';
+      'À bientôt,\nPlantify';
 
     await this.sendEmail(email, subject, text);
   }

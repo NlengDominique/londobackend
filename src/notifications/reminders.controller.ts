@@ -2,7 +2,11 @@
 import { Controller, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/auth.guards';
 import { WateringReminderService } from './watering-reminder.service';
+import { ApiTags } from '@nestjs/swagger';
 
+
+//route pour les rappels d'arrosage
+@ApiTags('rappels')
 @Controller('reminders')
 @UseGuards(JwtAuthGuard)
 export class RemindersController {

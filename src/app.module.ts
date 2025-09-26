@@ -26,10 +26,6 @@ import { databaseConfig } from './config/database.config';
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_PIPE,
-      useClass: ValidationPipe,
-    },
   ],
 })
 export class AppModule {}

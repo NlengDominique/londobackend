@@ -20,7 +20,7 @@ export class WateringReminderService {
 
   @Cron(CronExpression.EVERY_DAY_AT_8AM)
   async sendWateringReminders() {
-    this.logger.debug('Checking plants for watering reminders...');
+    this.logger.debug('Vérification des plantes pour les rappels d\'arrosage...');
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -42,14 +42,14 @@ export class WateringReminderService {
           plant.waterAmount
         );
       } catch (error) {
-        this.logger.error(`Failed to send watering reminder for plant ${plant.id}:`, error);
+        this.logger.error(`Erreur lors de l'envoi du rappel d'arrosage pour la plante ${plant.id}:`, error);
       }
     }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_5PM)
   async sendMissedWateringReminders() {
-    this.logger.debug('Checking for missed watering...');
+    this.logger.debug('Vérification des plantes pour les rappels d\'arrosage manqués...');
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -74,7 +74,7 @@ export class WateringReminderService {
           plant.waterAmount
         );
       } catch (error) {
-        this.logger.error(`Failed to send missed watering reminder for plant ${plant.id}:`, error);
+        this.logger.error(`Erreur lors de l'envoi du rappel d'arrosage manqué pour la plante ${plant.id}:`, error);
       }
     }
   }

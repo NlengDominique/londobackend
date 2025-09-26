@@ -23,7 +23,7 @@ export class PlantsService implements IPlantsService {
       purchaseDate: new Date(createPlantDto.purchaseDate),
     });
 
-    plant.nextWateringDate = this.calculateNextWateringDate(
+    plant.nextWateringDate = this.calculationService.calculateNextWateringDate(
       plant.purchaseDate,
       plant.wateringFrequency,
     );
@@ -47,28 +47,19 @@ export class PlantsService implements IPlantsService {
       throw new NotFoundException('Plante pas disponible');
     }
 
-     if (plant.userId !== userId) {
-    throw new ForbiddenException(
-     'Pas autorise a voir cette ressource'
-    );
-  }
-
     return plant;
   }
 
-  private calculateNextWateringDate(lastDate: Date, frequency: number): Date {
-    return this.calculationService.calculateNextWateringDate(lastDate, frequency);
-  }
 
+  //ajout d'une date d'arrosage
   async updateWateringDate(plantId: number, wateredAt: Date, userId: number): Promise<Plant> {
     const plant = await this.findOne(plantId, userId);
     
     plant.lastWateredAt = wateredAt;
-    plant.nextWateringDate = this.calculateNextWateringDate(
+    plant.nextWateringDate = this.calculationService.calculateNextWateringDate(
       wateredAt,
       plant.wateringFrequency,
     );
-
     return this.plantRepository.save(plant);
   }
 }

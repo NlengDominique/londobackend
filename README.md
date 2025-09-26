@@ -1,98 +1,279 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Plantify API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST pour la gestion de plantes
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+##  Table des matières
+
+- [Description](#description)
+- [Fonctionnalités](#fonctionnalités)
+- [Technologies utilisées](#technologies-utilisées)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Documentation API](#documentation-api)
+- [Endpoints](#endpoints)
+- [Modèles de données](#modèles-de-données)
+- [Système de notifications](#système-de-notifications)
+- [Scripts disponibles](#scripts-disponibles)
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Plantify est une API REST développée avec NestJS qui permet aux utilisateurs de gérer leurs plantes d'intérieur. L'application offre un système complet de suivi des arrosages avec des rappels automatiques par email.
 
-## Project setup
+## Fonctionnalités
 
+### Authentification
+- Inscription et connexion utilisateur
+- Authentification JWT
+
+### Gestion des plantes
+- Création et gestion de plantes
+- Suivi des informations détaillées (espèce, date d'achat, image)
+- Configuration des besoins en eau personnalisés
+
+### Système d'arrosage
+- Enregistrement des arrosages
+- Calcul automatique des prochains arrosages
+- Historique complet des arrosages
+
+### Notifications automatisées
+- Rappels d'arrosage quotidiens (8h00)
+- Notifications pour arrosages manqués (17h00)
+
+## Technologies utilisées
+
+- **Framework**: NestJS
+- **Base de données**: SQLite avec TypeORM
+- **Authentification**: JWT + Passport
+- **Validation**: Class Validator
+- **Documentation**: Swagger/OpenAPI
+- **Tâches planifiées**: NestJS Schedule
+- **Email**: Nodemailer
+- **Sécurité**: bcryptjs
+
+## 🚀 Installation
+
+### Prérequis
+- Node.js (version 18+)
+- npm ou yarn
+
+### Étapes d'installation
+
+1. **Cloner le repository**
 ```bash
-$ npm install
+git clone <repository-url>
+cd plantify/backend
 ```
 
-## Compile and run the project
-
+2. **Installer les dépendances**
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
-
+3. **Configuration de l'environnement**
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+4. **Démarrer l'application**
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Développement
+npm run start:dev
+
+# Production
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Configuration
 
-## Resources
+### Variables d'environnement
 
-Check out a few resources that may come in handy when working with NestJS:
+Créez un fichier `.env` à la racine du projet :
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```env
+# Base de données
+DATABASE_PATH=./data/plant.db
 
-## Support
+# JWT
+JWT_SECRET=votre_secret_jwt_ici
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Email (pour les notifications)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=votre_email@gmail.com
+EMAIL_PASS=votre_mot_de_passe_application
+```
 
-## Stay in touch
+### Configuration de la base de données
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+L'application utilise SQLite par défaut. La base de données sera créée automatiquement au premier démarrage dans le dossier `data/`.
 
-## License
+## Documentation API
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Une documentation interactive est disponible à l'adresse :
+```
+http://localhost:3000/api-docs
+```
+## Endpoints
+
+### Authentification (`/api/auth`)
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| POST | `/login` | Connexion utilisateur | Non |
+| POST | `/register` | Inscription utilisateur | Non |
+| GET | `/profile` | Profil utilisateur | Oui |
+
+### Plantes (`/api/plants`)
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| POST | `/` | Créer une plante | Oui |
+| GET | `/` | Liste des plantes | Oui |
+| GET | `/:id` | Détails d'une plante | Oui |
+
+### Arrosage (`/api/watering`)
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/all` | Historique des arrosages | Oui |
+| POST | `/plants/:plantId` | Enregistrer un arrosage | Oui |
+| GET | `/plants/:plantId` | Historique d'une plante | Oui |
+
+### Rappels (`/api/reminders`)
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| POST | `/test/watering` | Tester les rappels d'arrosage | Oui |
+| POST | `/test/missed` | Tester les rappels manqués | Oui |
+
+### Santé de l'API (`/api`)
+
+| Méthode | Endpoint | Description | Authentification |
+|---------|----------|-------------|------------------|
+| GET | `/health` | Statut de l'API | Non |
+
+## Modèles de données
+
+### User (Utilisateur)
+```typescript
+{
+  id: number;
+  email: string;
+  name: string;
+  password: string; // hashé
+  createdAt: Date;
+  updatedAt: Date;
+  plants: Plant[];
+}
+```
+
+### Plant (Plante)
+```typescript
+{
+  id: number;
+  userId: number;
+  name: string;
+  species?: string;
+  imageUrl?: string;
+  purchaseDate: Date;
+  waterAmount: number; // en ml
+  wateringFrequency: number; // en jours
+  lastWateredAt?: Date;
+  nextWateringDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  wateringRecords: WateringRecord[];
+}
+```
+
+### WateringRecord (Enregistrement d'arrosage)
+```typescript
+{
+  id: number;
+  plantId: number;
+  userId: number;
+  wateredAt: Date;
+  waterAmount: number; // en ml
+  createdAt: Date;
+}
+```
+
+## Système de notifications
+
+### Rappels automatiques
+
+L'application envoie automatiquement des emails :
+
+1. **Rappels d'arrosage** : Tous les jours à 8h00
+   - Vérifie les plantes nécessitant un arrosage
+   - Envoie un email à l'utilisateur
+
+2. **Rappels d'arrosages manqués** : Tous les jours à 17h00
+   - Vérifie les plantes non arrosées depuis plus de 1 jour
+   - Envoie un email de rappel
+
+### Configuration email
+
+Pour activer les notifications, configurez les variables d'environnement email dans votre fichier `.env`.
+
+## 🚀 Scripts disponibles
+
+```bash
+# Développement
+npm run start:dev          # Démarrage avec rechargement automatique
+npm run start:debug        # Démarrage en mode debug
+
+# Production
+npm run build             # Compilation TypeScript
+npm run start:prod        # Démarrage en production
+
+# Tests
+npm run test              # Tests unitaires
+npm run test:watch        # Tests en mode watch
+npm run test:cov          # Tests avec couverture
+npm run test:e2e          # Tests end-to-end
+
+# Qualité du code
+npm run lint              # Linting ESLint
+npm run format            # Formatage Prettier
+```
+
+##  Sécurité
+
+- **Authentification JWT** avec expiration de 24h
+- **Hachage des mots de passe** avec bcrypt (12 rounds)
+- **Validation des données** avec class-validator
+- **CORS configuré** pour le frontend
+- **Filtres d'exception globaux** pour la gestion d'erreurs
+
+## Fonctionnalités avancées
+
+### Calcul automatique des arrosages
+- Calcul automatique de la prochaine date d'arrosage
+- Prise en compte de la fréquence personnalisée
+- Mise à jour automatique après chaque arrosage
+
+### Système de rappels intelligent
+- Détection automatique des plantes nécessitant un arrosage
+- Gestion des arrosages manqués
+
+## Contribution
+
+1. Fork le projet
+2. Créer une branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit les changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+##  Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+##  Support
+
+Pour toute question ou problème, veuillez ouvrir une issue sur le repository GitHub.
+
+---
+
+**Développé avec ❤️ pour les amoureux des plantes** 

@@ -76,7 +76,7 @@ export class WateringService implements IWateringService {
     });
 
     if (!wateringRecord) {
-      throw new NotFoundException(`Watering record with ID ${id} not found`);
+      throw new NotFoundException(`Ressource non trouvee`);
     }
 
     return wateringRecord;

@@ -6,7 +6,7 @@ import { WateringRecord } from 'src/watering/entities/watering-record.entity';
 
 export const databaseConfig = (): TypeOrmModuleOptions => ({
   type: 'sqlite',
-  database: 'data/plant-manager.db',
+  database: 'data/test-technique.db',
   entities: [User, Plant,WateringRecord],
   synchronize: process.env.NODE_ENV !== 'production',
   logging: process.env.NODE_ENV === 'development',
